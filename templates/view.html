@@ -1,4 +1,8 @@
 
+{% extends "base.html" %}
+{% block title %}{{ note.title }} — FlaskNotes{% endblock %}
+
+{% block content %}
 <div class="note-view-wrapper">
     <div class="note-view glass-card" id="note-view" style="--accent: {{ note.color }}">
         <div class="note-view-bar" style="background: {{ note.color }}"></div>

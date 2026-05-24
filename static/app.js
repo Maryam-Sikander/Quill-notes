@@ -1,10 +1,5 @@
-/**
- * FlaskNotes — Client-side interactivity
- * Handles pin toggling, AJAX delete, and micro-animations.
- */
-
 document.addEventListener("DOMContentLoaded", () => {
-    // --------------- Pin toggle ---------------
+    // Pin 
     document.querySelectorAll(".pin-btn").forEach((btn) => {
         btn.addEventListener("click", async (e) => {
             e.preventDefault();
@@ -22,7 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // --------------- AJAX delete on cards ---------------
+    //  delete on cards
     document.querySelectorAll(".delete-btn").forEach((btn) => {
         btn.addEventListener("click", async (e) => {
             e.preventDefault();
@@ -53,13 +48,12 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // --------------- Staggered card entrance ---------------
+    // card entrance 
     const cards = document.querySelectorAll(".note-card");
     cards.forEach((card, i) => {
         card.style.animationDelay = `${i * 0.06}s`;
     });
 
-    // --------------- Search auto-submit on Enter ---------------
     const searchInput = document.getElementById("search-input");
     if (searchInput) {
         searchInput.addEventListener("keydown", (e) => {
@@ -69,7 +63,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // --------------- Textarea auto-resize ---------------
     const textarea = document.getElementById("content");
     if (textarea) {
         const autoResize = () => {
