@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="FlaskNotes — A beautiful, dark-mode notes app with tagging, search, and pinning.">
+    <title>{% block title %}FlaskNotes{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <!-- Animated background orbs -->
+    <div class="bg-orb bg-orb-1"></div>
+    <div class="bg-orb bg-orb-2"></div>
+    <div class="bg-orb bg-orb-3"></div>
+
+    <nav class="navbar" id="main-nav">
+        <a href="{{ url_for('index') }}" class="nav-brand">
+            <span class="nav-icon">📝</span>
+            <span class="nav-title">FlaskNotes</span>
+        </a>
+        <div class="nav-actions">
+            <a href="{{ url_for('new_note') }}" class="btn btn-primary" id="btn-new-note">
+                <span class="btn-icon">+</span> New Note
+            </a>
+        </div>
+    </nav>
+
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

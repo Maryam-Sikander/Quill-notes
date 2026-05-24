@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if note else 'New' }} Note — FlaskNotes{% endblock %}
+
+{% block content %}
+<div class="form-wrapper">
+    <div class="form-card glass-card" id="note-form-card">
+        <h1 class="form-title">{{ '✏️ Edit Note' if note else '✨ New Note' }}</h1>
+
+        <form
+            action="{{ url_for('update_note', note_id=note.id) if note else url_for('create_note') }}"
+            method="POST"
+            class="note-form"
+            id="note-form"
+        >
+            <!-- Title -->
+            <div class="form-group">
+                <label for="title" class="form-label">Title</label>
+                <input
+                    type="text"
+                    id="title"
+                    name="title"
+                    class="form-input"
+                    placeholder="Give your note a title…"
+                    value="{{ note.title if note else '' }}"
+                    required
+                    autofocus
+                >
+            </div>
+
+            <!-- Content -->
+            <div class="form-group">
+                <label for="content" class="form-label">Content</label>
+                <textarea
+                    id="content"
+                    name="content"
+                    class="form-textarea"
+                    placeholder="Write your note here…"
+                    rows="10"
+                >{{ note.content if note else '' }}</textarea>
+            </div>
+
+            <!-- Tags -->
+            <div class="form-group">
+                <label for="tags" class="form-label">Tags <span class="form-hint">(comma-separated)</span></label>
+                <input
+                    type="text"
+                    id="tags"
+                    name="tags"
+                    class="form-input"
+                    placeholder="e.g. work, ideas, urgent"
+                    value="{{ note.tags | join(', ') if note and note.tags else '' }}"
+                >
+            </div>
+
+            <!-- Color -->
+            <div class="form-group">
+                <label class="form-label">Color</label>
+                <div class="color-picker" id="color-picker">
+                    {% set colors = ['#6c5ce7', '#00b894', '#e17055', '#0984e3', '#e84393', '#fdcb6e', '#00cec9', '#d63031'] %}
+                    {% for c in colors %}
+                    <label class="color-swatch" style="background: {{ c }}">
+                        <input type="radio" name="color" value="{{ c }}"
+                            {{ 'checked' if (note and note.color == c) or (not note and c == '#6c5ce7') else '' }}>
+                        <span class="color-check">✓</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="form-actions">
+                <a href="{{ url_for('view_note', note_id=note.id) if note else url_for('index') }}" class="btn btn-secondary" id="btn-cancel">Cancel</a>
+                <button type="submit" class="btn btn-primary" id="btn-save">
+                    {{ '💾 Save Changes' if note else '✨ Create Note' }}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

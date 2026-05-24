@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}FlaskNotes — Your Notes{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <h1 class="hero-title">Your Notes</h1>
+    <p class="hero-subtitle">{{ notes|length }} note{{ 's' if notes|length != 1 else '' }}{% if active_tag %} tagged <span class="hero-tag">{{ active_tag }}</span>{% endif %}</p>
+</section>
+
+<!-- Search & filter bar -->
+<div class="toolbar glass-card" id="toolbar">
+    <form class="search-form" action="{{ url_for('index') }}" method="GET" id="search-form">
+        {% if active_tag %}
+            <input type="hidden" name="tag" value="{{ active_tag }}">
+        {% endif %}
+        <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input
+                type="text"
+                name="q"
+                id="search-input"
+                class="search-input"
+                placeholder="Search notes…"
+                value="{{ search_query }}"
+                autocomplete="off"
+            >
+            {% if search_query %}
+                <a href="{{ url_for('index', tag=active_tag) if active_tag else url_for('index') }}" class="search-clear" title="Clear search">✕</a>
+            {% endif %}
+        </div>
+    </form>
+
+    {% if tags %}
+    <div class="tag-bar" id="tag-bar">
+        <a href="{{ url_for('index', q=search_query) if search_query else url_for('index') }}"
+           class="tag-chip {{ 'active' if not active_tag else '' }}">All</a>
+        {% for tag in tags %}
+        <a href="{{ url_for('index', tag=tag.name, q=search_query) if search_query else url_for('index', tag=tag.name) }}"
+           class="tag-chip {{ 'active' if active_tag == tag.name else '' }}">
+            {{ tag.name }} <span class="tag-count">{{ tag.count }}</span>
+        </a>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+<!-- Notes grid -->
+{% if notes %}
+<div class="notes-grid" id="notes-grid">
+    {% for note in notes %}
+    <article class="note-card glass-card {% if note.is_pinned %}pinned{% endif %}" 
+             data-note-id="{{ note.id }}"
+             style="--accent: {{ note.color }}">
+        
+        <div class="note-card-header">
+            {% if note.is_pinned %}
+            <span class="pin-badge" title="Pinned">📌</span>
+            {% endif %}
+            <div class="note-card-actions">
+                <button class="icon-btn pin-btn" data-id="{{ note.id }}" title="{{ 'Unpin' if note.is_pinned else 'Pin' }} note">
+                    {{ '📌' if note.is_pinned else '📍' }}
+                </button>
+                <button class="icon-btn delete-btn" data-id="{{ note.id }}" title="Delete note">🗑️</button>
+            </div>
+        </div>
+
+        <a href="{{ url_for('view_note', note_id=note.id) }}" class="note-card-body">
+            <div class="note-color-bar" style="background: {{ note.color }}"></div>
+            <h2 class="note-card-title">{{ note.title }}</h2>
+            <p class="note-card-preview">{{ note.content[:150] }}{{ '…' if note.content|length > 150 else '' }}</p>
+        </a>
+
+        <div class="note-card-footer">
+            <div class="note-card-tags">
+                {% for tag in note.tags %}
+                <span class="mini-tag">{{ tag }}</span>
+                {% endfor %}
+            </div>
+            <time class="note-card-date">{{ note.updated_at[:10] }}</time>
+        </div>
+    </article>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state glass-card" id="empty-state">
+    <div class="empty-icon">📝</div>
+    <h2 class="empty-title">No notes yet</h2>
+    <p class="empty-text">Create your first note to get started!</p>
+    <a href="{{ url_for('new_note') }}" class="btn btn-primary">+ Create Note</a>
+</div>
+{% endif %}
+{% endblock %}
