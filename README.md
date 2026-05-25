@@ -49,8 +49,7 @@ Make sure you have **Python 3.7+** installed on your system.
    python app.py
    ```
 
-3. **Open the App**:
-Then open your browser to http://127.0.0.1:5000
+3. **Open the App**: Open your browser to http://127.0.0.1:5000
 ---
 
 ## Data Persistence
