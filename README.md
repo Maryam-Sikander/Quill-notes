@@ -4,7 +4,7 @@ Quill is a personal notes application designed with an Obsidian-inspired glassmo
 
 ## Key Features
 
-- **Full CRUD Support**: Create, Read, Update, and Delete notes.
+- **CRUD**: Create, Read, Update, and Delete notes.
 - **Tagging**: Organise notes using tags, tag filtering keeps your workspace clean
 - **Note Pinning**: Pin important notes to keep them anchored at the top of your list.
 - **Search bar**: Find notes instantly by title or content.
