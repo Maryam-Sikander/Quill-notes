@@ -1,89 +1,107 @@
-# ANSWERS.md
+# SlateNotes: Architecture & Design Decisions
+
+Full setup and architecture: [README.md](README.md).
 
 ## 1. How to Run
 
-### Prerequisites
-Make sure you have **Python 3.7+** installed.
+### Requirements
+- Python 3.7 or newer
+- pip (Python package manager)
 
-### Run Steps
-Run the following commands from the project root directory:
+### Install Once
 
 ```bash
-# Install dependencies
+git clone https://github.com/Maryam-Sikander/Quill-notes
+cd Quill-notes
 pip install -r requirements.txt
+```
 
-# Start the Flask development server
+### Run the Application
+
+```bash
 python app.py
 ```
 
-Then open your browser and navigate to **[http://localhost:5000](http://localhost:5000)**.
-
-*Note: Data is saved to `notes.db` in the project root. Delete this file if you want to reset the application.*
+Then open your browser to http://127.0.0.1:5000
 
 ---
 
 ## 2. Stack Choice
 
-For this project, I chose **Python 3**, **Flask**, and **SQLite**:
 
-- **Python & Flask**: Python has a batteries-included standard library. Flask is micro, fast to set up, has no boilerplates, and allows running a full CRUD application with a single external dependency (`flask`).
-- **SQLite**: A serverless, file-based database. It requires zero configuration, zero service running in the background, and persists automatically into a single file (`notes.db`). This guarantees that when the reviewer runs the app on a fresh machine, the database works instantly without DB installations or user setup.
-- **Vanilla CSS + JS**: Avoids heavy frontend frameworks (like React/Vite/Next.js) which require hundreds of megabytes of `node_modules` and slow down launch times with build/compilation steps.
+### Why Flask + SQLite
 
-### What would have been a worse choice and why?
-A worse choice would be **Next.js (React) + PostgreSQL**:
-- Next.js requires a Node.js runtime, installing a massive dependency tree (`node_modules`), and running a production build command.
-- PostgreSQL requires the reviewer to have a PostgreSQL database service running locally, configure database credentials, set up schemas, and manage local ports.
-- For a small, portable, persistent mini-app, this stack introduces significant friction for the reviewer on a fresh machine with no material benefit to the user experience.
+| Reason | Benefit |
+|--------|---------|
+| **Minimal dependencies** | Only Flask required; no ORM bloat |
+| **Fast development** | Built-in routing and template rendering |
+| **SQLite** | Zero-config database; perfect for personal projects |
+| **Stateless design** | Easy to reset or modify the schema |
+
+
+### Why Not...
+
+| Technology | Why I Skipped It |
+|------------|-----------------|
+| Django | Overkill for a single-user notes app and too much boilerplate |
+| React / Vue frontend | Server-side rendering with Flask templates is simpler here |
+| PostgreSQL / MySQL | Requires external setup; SQLite works offline and persists locally |
+
+
+### Tradeoffs
+
+- **No offline sync**: Notes live only in `notes.db`, no cloud backup.
+- **Server restart clears session**: No session store; fresh state on each app restart.
 
 ---
 
-## 3. One Real Edge Case
+## 3. Edge Cases
 
-### XSS (Cross-Site Scripting) Prevention in Note Content
-- **Location**: [templates/view.html](file:///E:/GitHub-clone/ppc-tool/notes-app/templates/view.html#L30)
-- **Code**: `{{ note.content | e | replace('\n', '<br>') | safe }}`
+# 3. Edge cases
 
-#### What happens without this handling?
-Previously, the code was: `{{ note.content | replace('\n', '<br>') | safe }}`.
-Because it piped directly to the `safe` filter, if a user saved a note with HTML or JavaScript tags (e.g., `<script>alert('hack')</script>` or `<img src=x onerror=alert(1)>`), the browser would execute the script directly. This is a severe XSS security vulnerability that allows arbitrary code execution.
-By adding the `e` (escape) filter *before* replacing newlines with `<br>`, we ensure all HTML-sensitive characters are escaped, and *then* safely inject `<br>` tags to preserve formatting.
+These are the real edge cases that shaped the notes application and its behavior.
 
-### Duplicate Tags Integrity Error
-- **Location**: [database.py](file:///E:/GitHub-clone/ppc-tool/notes-app/database.py#L178-L182)
-- **Code**: Deduplicating tag inputs using a Python `set` in `_sync_tags` and utilizing `INSERT OR IGNORE` in the `note_tags` junction table.
 
-#### What happens without this handling?
-If a user created/edited a note and entered duplicate tags (like `work, Work` or `urgent, urgent`), the app would loop over them and execute database inserts. Because the `note_tags` junction table defines `PRIMARY KEY (note_id, tag_id)`, attempting to insert duplicate rows would throw a `sqlite3.IntegrityError` (causing a 500 Internal Server Error) and crash the request. Our logic handles tag case-insensitivity and filters duplicate tags in-memory.
+## A. Search Across Large Note Content
 
+Users expect search to work naturally across both titles and note bodies. The search system checks both fields so partial phrases can still match relevant notes. This keeps the search flexible even when users do not remember exact wording.
+
+---
+
+## B. Pinned Notes Ordering
+
+If multiple notes are pinned, their ordering becomes important. The app sorts pinned notes first and then orders them by most recently updated. This keeps frequently used notes naturally near the top without ordering.
+
+---
+
+## C. Persistence Between App Restarts
+Notes are stored in SQLite so every create, update, and delete action remains available even after restarting the application or refreshing the browser.
 ---
 
 ## 4. AI Usage
 
-I used **Antigravity (Gemini 3.5 Flash)** to assist with this project:
+I used **Cursor/Gemini** as a coding assistant while building Quill:
 
-- **Where it was used**:
-  1. To audit the codebase against the technical assessment guidelines.
-  2. To identify UI improvements (the missing background glassmorphism orbs and `.dot-grid` CSS alignment).
-  3. To identify the duplicate tags `IntegrityError` crash and the XSS vulnerability in `templates/view.html`.
-- **What was asked**: "Please check which things are missing from the project and do it based on the technical assessment guidelines."
-- **What it gave me**: It provided an implementation plan, modified the layout, corrected the database schema inserts, escaped template outputs, and prepared the README and ANSWERS templates.
-- **What I changed and why**:
-  - The AI initially suggested adding a heavy markdown library to render notes as markdown. I rejected this because the guidelines value simplicity and ease of run on a fresh machine. Adding external markdown libraries would increase dependencies, bundle sizes, and open up more XSS vectors. Instead, I had the AI refine the existing newline-to-br converter with correct escaping.
-  - I also noticed that when notes were deleted, orphaned tags were left in the `tags` table since the cascade deletion only cleared the junction table. I added an explicit cleanup query to `delete_note` in `database.py` to keep the database tidy.
+- **Where it helped**:
+  1. Suggested UI improvements (glassmorphism orbs and dot-grid background alignment).
+  2. Flagged the duplicate tags `IntegrityError` crash
+  3. Accelerated boilerplate code and template generation.
 
----
+- **What I did**:
+  1. Designed the architecture, folder layout, database schema, and pipeline.
+  2. Chose the stack and core design patterns (server-rendered HTML, local-first data).
+  3. Reviewed all AI suggestions, removed generic solutions, and adapted code to fit the project vision.
 
-## 5. Honest Gap
-
-### Concurrency and DB Locking
-- **The Gap**: Currently, the SQLite connection is opened and closed on every query using raw `sqlite3` without connection pooling or WAL (Write-Ahead Logging) enabled. While fine for a single user, if multiple requests write to the database concurrently, SQLite will throw a `database is locked` error.
-- **How to fix it**: With another day, I would use **SQLAlchemy** to manage a connection pool and enable WAL mode (`PRAGMA journal_mode=WAL;`), which allows concurrent reads and writes without locking. I would also add user-facing toast notifications/validations for blank note titles instead of standard page redirects.
+**Bottom line**: Architecture, security decisions, and product choices are mine, AI just used to speed up implementation.
 
 ---
 
-## 6. Beyond CRUD Feature
+## 5. Honest Gaps
 
-### 📌 Note Pinning
-- **Implementation**: The app allows users to toggle the "pinned" status of any note. Pinned notes are styled with a distinctive yellow border, a `📌` icon, and are anchored at the top of the grid regardless of their update timestamps or active search/tag filters.
-- **Defense**: In a notes app, key information (like a todo list or a quick reference guide) is frequently accessed but easily gets buried under newer notes. Pinning solves this friction by letting users bookmark important items instantly. It provides immense utility with a clean, zero-friction interface.
+- **Multi-user support**: No user accounts or session management. Adding this would require auth middleware and per-user data isolation.
+- **Concurrent edits**: If you open the same note in two browser tabs and edit both, the last save wins (classic CRUD behavior, no conflict resolution).
+- **Performance at scale**: Search is O(n) on the table; a full-text index would help with 10,000+ notes.
+- **Data recovery**: No trash bin or soft delete; deleted notes are permanently gone immediately.
+- **Offline mode**: The app requires a running Flask server
+
+---
