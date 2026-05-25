@@ -1,4 +1,4 @@
-# Quill 📝
+# Quill
 
 Quill is a personal notes application designed with an Obsidian-inspired glassmorphism dark theme. Users can create, view, edit, and delete notes, each customizable with distinct color accents, titles, body content, and tags.
 
