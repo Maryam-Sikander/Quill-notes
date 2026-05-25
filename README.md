@@ -9,7 +9,28 @@ Quill is a personal notes application designed with an Obsidian-inspired glassmo
 - **Note Pinning**: Pin important notes to keep them anchored at the top of your list.
 - **Search bar**: Find notes instantly by title or content.
 ---
+# Project Layout
 
+```text
+Quill-notes/
+├── static/
+│ ├── app.js
+│ └── style.css
+│
+├── templates/
+│ ├── base.html
+│ ├── index.html
+│ ├── edit.html
+│ └── view.html
+│
+├── app.py
+├── database.py
+├── notes.db
+├── requirements.txt
+├── README.md
+├── ANSWERS.md
+└── .gitignore
+```
 ## Getting Started
 
 ### Prerequisites
