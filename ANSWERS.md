@@ -1,13 +1,9 @@
-# SlateNotes: Architecture & Design Decisions
-
 Full setup and architecture: [README.md](README.md).
 
 ## 1. How to Run
 
 ### Requirements
 - Python 3.7 or newer
-- pip (Python package manager)
-
 ### Install Once
 
 ```bash
