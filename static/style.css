@@ -735,7 +735,7 @@ button {
 .color-swatch:has(input:checked) {
     border-color: rgba(255, 255, 255, 0.6);
     transform: scale(1.15);
-    box-shadow: 0 0 12px rgba(255, 255, 255, 0.15);
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.14);
 }
 
 .form-actions {

@@ -1,5 +1,6 @@
 import sqlite3
 import os
+import json
 from datetime import datetime
 
 DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "notes.db")
