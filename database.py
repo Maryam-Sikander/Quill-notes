@@ -127,6 +127,12 @@ def update_note(note_id, title, content, color="#6c5ce7", tags=None):
 def delete_note(note_id):
     conn = get_db()
     conn.execute("DELETE FROM notes WHERE id = ?", (note_id,))
+    # Clean up orphan tags since CASCADE delete of note_tags doesn't trigger deletion in tags table
+    conn.execute("""
+        DELETE FROM tags WHERE id NOT IN (
+            SELECT DISTINCT tag_id FROM note_tags
+        )
+    """)
     conn.commit()
     conn.close()
 
@@ -172,13 +178,15 @@ def _get_note_tags(conn, note_id):
 def _sync_tags(conn, note_id, tag_names):
     conn.execute("DELETE FROM note_tags WHERE note_id = ?", (note_id,))
 
+    seen = set()
     for name in tag_names:
         name = name.strip().lower()
-        if not name:
+        if not name or name in seen:
             continue
+        seen.add(name)
         conn.execute("INSERT OR IGNORE INTO tags (name) VALUES (?)", (name,))
         tag = conn.execute("SELECT id FROM tags WHERE name = ?", (name,)).fetchone()
-        conn.execute("INSERT INTO note_tags (note_id, tag_id) VALUES (?, ?)", (note_id, tag["id"]))
+        conn.execute("INSERT OR IGNORE INTO note_tags (note_id, tag_id) VALUES (?, ?)", (note_id, tag["id"]))
 
     conn.execute("""
         DELETE FROM tags WHERE id NOT IN (

@@ -27,7 +27,7 @@
         </div>
 
         <div class="note-view-content" id="note-content">
-            {{ note.content | replace('\n', '<br>') | safe }}
+            {{ note.content | e | replace('\n', '<br>') | safe }}
         </div>
 
         <div class="note-view-actions">
